@@ -1,4 +1,6 @@
 {
+  "scriptFile": "Function.psm1",
+  "entryPoint": "Invoke",
   "bindings": [
     {
       "authLevel": "anonymous",
