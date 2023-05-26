@@ -13,7 +13,7 @@ function Invoke {
         "Message" = "Hello $Name!"
     }
     
-    Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
+    Push-OutputBinding -Name Response -Value (@{
             StatusCode = [HttpStatusCode]::OK
             Body       = ($Return | ConvertTo-Json)
         })
