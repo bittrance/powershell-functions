@@ -1,43 +1,43 @@
 using namespace System.Net
 
-Import-Module -Name ./HelloWorld/Function.psm1 
-
-function Global:Push-OutputBinding {
-    param(
-        [Parameter(Mandatory = $true)]
-        [string] $Name,
-        [Parameter(Mandatory = $true)]
-        [object] $Value
-    )
-    $global:Response = $Value
-}
-
 Describe "Invoke" {
     BeforeAll {
+        $R = @{ Response = $null }
+        function Push-OutputBinding {
+            param(
+                [Parameter(Mandatory = $true)]
+                [string] $Name,
+                [Parameter(Mandatory = $true)]
+                [object] $Value
+            )
+            Write-Host $Response
+            $R.Response = $Value
+        }
         $Request = @{ Query = @{ "name" = "Test" } }
-        Invoke -Request $Request
+        . ./HelloWorld/Function.ps1 -Request $Request
     }
 
     It "Returns a 200 response" {
-        $global:Response.StatusCode | Should -Be ([HttpStatusCode]::OK)
+        $R.Response.StatusCode | Should -Be ([HttpStatusCode]::OK)
     }
 
     It "Returns a message" {
-        $global:Response.Body | Should -Match "Hello Test!"
+        $R.Response.Body | Should -Match "Hello Test!"
     }
 
     Context "When no name is provided" {
         BeforeAll {
+            $R.Response = $null
             $Request = @{ Query = @{} }
-            Invoke -Request $Request
+            . ./HelloWorld/Function.ps1 -Request $Request
         }
 
         It "Returns a 200 response" {
-            $global:Response.StatusCode | Should -Be ([HttpStatusCode]::OK)
+            $R.Response.StatusCode | Should -Be ([HttpStatusCode]::OK)
         }
 
         It "Returns a message" {
-            $global:Response.Body | Should -Match "Hello World!"
+            $R.Response.Body | Should -Match "Hello World!"
         }
     }
 }
