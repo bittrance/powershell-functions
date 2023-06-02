@@ -1,7 +1,12 @@
 using namespace System.Net
 
+Import-Module ./Modules/Emulation.psm1
+
+$script:PowerShellWorkerPath = "/usr/lib/azure-functions-core-tools-4/workers/powershell/7.2/"
+
 Describe "Invoke" {
     BeforeAll {
+        Start-EmulateAzFuncWorker
         $R = @{ Response = $null }
         function Push-OutputBinding {
             param(
@@ -33,7 +38,7 @@ Describe "Invoke" {
     Context "When no name is provided" {
         BeforeAll {
             $R.Response = $null
-            $Request = @{ Query = @{} }
+            $Request = New-MockObject -Type HttpRequestContext -Properties @{ Query = @{} }
             . ./HelloWorld/Function.ps1 -Request $Request
         }
 
