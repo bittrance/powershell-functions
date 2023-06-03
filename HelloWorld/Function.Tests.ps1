@@ -22,7 +22,7 @@ Describe "Invoke" {
     }
 
     It "Returns a message" {
-        $R.Response.Body | Should -Match "Hello Test!"
+        $R.Response.Body | Should -Match "Message: Hello Test!"
     }
 
     Context "When no name is provided" {

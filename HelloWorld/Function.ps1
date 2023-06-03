@@ -2,6 +2,8 @@ using namespace System.Net
 
 param($Request)
 
+Import-Module powershell-yaml
+
 $Name = $Request.Query['name']
 if ([string]::IsNullOrWhiteSpace($Name)) {
     $Name = "World"
@@ -14,5 +16,5 @@ $Return = @{
 
 Push-OutputBinding -Name Response -Value (@{
         StatusCode = [HttpStatusCode]::OK
-        Body       = ($Return | ConvertTo-Json)
+        Body       = ConvertTo-Yaml $Return
     })
