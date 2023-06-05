@@ -2,6 +2,8 @@ using namespace System.Net
 
 param($Request)
 
+Import-Module NtpTime
+
 $Name = $Request.Query['name']
 if ([string]::IsNullOrWhiteSpace($Name)) {
     $Name = "World"
@@ -9,6 +11,7 @@ if ([string]::IsNullOrWhiteSpace($Name)) {
 
 $Return = @{
     "Success" = $true
+    "Timestamp" = (Get-NtpTime -NoDns).NtpTime
     "Message" = "Hello $Name!"
 }
 
