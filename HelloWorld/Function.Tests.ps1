@@ -21,6 +21,11 @@ Describe "Invoke" {
         $R.Response.StatusCode | Should -Be ([HttpStatusCode]::OK)
     }
 
+    It "Includes NTP timestamp" {
+        $time = ($R.Response.Body | ConvertFrom-Json).Timestamp
+        ((Get-Date) - $time).TotalSeconds | Should -BeLessThan 1
+    }
+
     It "Returns a message" {
         $R.Response.Body | Should -Match "Hello Test!"
     }
