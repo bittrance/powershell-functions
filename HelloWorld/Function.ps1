@@ -15,7 +15,7 @@ $Return = @{
     "Message" = "Hello $Name!"
 }
 
-Push-OutputBinding -Name Response -Value (@{
+Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::OK
         Body       = ($Return | ConvertTo-Json)
     })
