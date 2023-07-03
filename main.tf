@@ -1,6 +1,25 @@
+terraform {
+  required_providers {
+    azuread = {
+      source = "hashicorp/azuread"
+      version = "2.39.0"
+    }
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "3.57.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "3.5.1"
+    }
+  }
+}
+
 provider "azurerm" {
   features {}
 }
+
+data "azurerm_client_config" "current" {}
 
 resource "azurerm_resource_group" "rg" {
   name     = "powershell-example"
@@ -41,7 +60,7 @@ resource "azurerm_service_plan" "service_plan" {
   os_type             = "Windows"
   sku_name            = "Y1"
   tags = {}
-  }
+}
 
 resource "azurerm_windows_function_app" "function_app" {
   name                       = "powershell-example"
@@ -56,15 +75,45 @@ resource "azurerm_windows_function_app" "function_app" {
       powershell_core_version = "7.2"
     }
   }
-  app_settings = {
-    "FUNCTIONS_EXTENSION_VERSION"    = "~4",
-    "FUNCTIONS_WORKER_RUNTIME"       = "powershell",
+
+  identity {
+    type = "SystemAssigned"
   }
-  tags = {}
+
+  auth_settings_v2 {
+    auth_enabled           = true
+    require_authentication = true
+    unauthenticated_action = "Return401"
+
+    login {}
+
+    active_directory_v2 {
+      client_id                  = azuread_application.aad_app.application_id
+      client_secret_setting_name = "AAD_CLIENT_SECRET"
+      tenant_auth_endpoint       = "https://sts.windows.net/${data.azurerm_client_config.current.tenant_id}/v2.0"
+    }
+  }
+
+  app_settings = {
+    "FUNCTIONS_EXTENSION_VERSION" = "~4",
+    "FUNCTIONS_WORKER_RUNTIME"    = "powershell",
+    "AAD_CLIENT_SECRET"           = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.kv.name};SecretName=AAD-CLIENT-SECRET)"
+  }
+
   lifecycle {
     ignore_changes = [
       app_settings["WEBSITE_RUN_FROM_PACKAGE"],
       tags,
     ]
   }
+
+  depends_on = [azurerm_key_vault_secret.aad_secret]
+  tags       = {}
+}
+
+resource "azurerm_key_vault_access_policy" "kv_policy" {
+  key_vault_id       = azurerm_key_vault.kv.id
+  tenant_id          = azurerm_windows_function_app.function_app.identity[0].tenant_id
+  object_id          = azurerm_windows_function_app.function_app.identity[0].principal_id
+  secret_permissions = ["Get"]
 }
