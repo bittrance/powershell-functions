@@ -4,6 +4,11 @@ This repository contains a simple demonstration Azure Function App written in Po
 
 In order to work with this Function App, you need [Azure Functions Core Tools](https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local).
 
+The app includes the following example functions:
+
+- HelloWorld: A simple function that returns a greeting and the current time.
+- ParallelHelloWorld: A function that illustrates thread-based parallel execution in a function app.
+
 ## Developing an Azure Function
 
 First, you will need the dependencies installed locally:
@@ -76,3 +81,4 @@ Once the Function App has been published, you can invoke it like so:
 CLIENT_ID=$(az webapp auth show --resource-group powershell-example --name powershell-example --query clientId --output tsv)
 az rest --url https://powershell-example.azurewebsites.net/HelloWorld --resource $CLIENT_ID --verbose
 ```
+
