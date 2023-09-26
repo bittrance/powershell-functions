@@ -67,3 +67,12 @@ func azure functionapp publish powershell-example
 ```
 
 This will output a message similar to the one printed by `func host start` and you can use `Invoke-RestMethod` to test it.
+
+## Invoking the published Function App
+
+Once the Function App has been published, you can invoke it like so:
+
+```shell
+CLIENT_ID=$(az webapp auth show --resource-group powershell-example --name powershell-example --query clientId --output tsv)
+az rest --url https://powershell-example.azurewebsites.net/HelloWorld --resource $CLIENT_ID --verbose
+```
